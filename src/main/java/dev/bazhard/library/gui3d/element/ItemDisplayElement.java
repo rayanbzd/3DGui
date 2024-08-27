@@ -15,7 +15,7 @@ public class ItemDisplayElement extends GenericDisplayElement {
 
     private ItemStack itemStack;
 
-    public ItemDisplayElement(Player viewer, ItemStack itemStack, Location location) {
+    public ItemDisplayElement(Player viewer, Location location, ItemStack itemStack) {
         super(viewer, location);
         this.itemStack = itemStack;
     }
@@ -41,12 +41,9 @@ public class ItemDisplayElement extends GenericDisplayElement {
     }
 
     @Override
-    protected List<WrappedDataValue> getAdditionalDataValues(){
-        return List.of(
-                new WrappedDataValue(23,                                                                          // ItemStack data
-                        WrappedDataSerializers.itemStackSerializer,
-                        MinecraftReflection.getMinecraftItemStack(getItemStack())
-        ));
+    protected List<WrappedDataValue> getAdditionalDataValues(){ // https://wiki.vg/Entity_metadata#Item_Display
+        return List.of(new WrappedDataValue(23, WrappedDataSerializers.itemStackSerializer,
+                MinecraftReflection.getMinecraftItemStack(getItemStack())));                                            // ItemStack data
     }
 
 }
