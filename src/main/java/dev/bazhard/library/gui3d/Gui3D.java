@@ -1,11 +1,11 @@
 package dev.bazhard.library.gui3d;
 
+import dev.bazhard.library.gui3d.element.TextDisplayElement;
 import dev.bazhard.library.gui3d.listeners.DisplayElementClickListener;
 import dev.bazhard.library.gui3d.listeners.DisplayElementHoverListener;
-import dev.bazhard.library.gui3d.element.ItemDisplayElement;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,32 +45,43 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
         getLogger().info("3D GUI has been disabled!");
     }
 
-    private ItemDisplayElement itemDisplayElement;
+    private TextDisplayElement textDisplayElement;
 
+    // This is a test command and should be removed
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String msg, @NotNull String[] args) {
         if(!(sender instanceof Player player))return false;
 
-        if(itemDisplayElement == null) {
-            itemDisplayElement = new ItemDisplayElement(player, new ItemStack(Material.valueOf(args[0])), player.getLocation());
-            itemDisplayElement.setHoverAction(viewer -> {
-                itemDisplayElement.setGlowing(true);
-                itemDisplayElement.setGlowColor(Color.LIME);
-                itemDisplayElement.setScale(new Vector3f(1.5f, 1.5f, 1.5f));
-                itemDisplayElement.update();
+        if(textDisplayElement == null) {
+            textDisplayElement = new TextDisplayElement(player, player.getLocation(), MiniMessage.miniMessage().deserialize("<gradient:red:blue>Test Test Test</gradient><newline><gradient:aqua:gold>Test Test Test</gradient>"));
+            textDisplayElement.setHoverAction(viewer -> {
+                textDisplayElement.setGlowing(true);
+                textDisplayElement.setGlowColor(Color.LIME);
+                textDisplayElement.setBackgroundColor(Color.ORANGE);
+                textDisplayElement.hasShadow(true);
+                textDisplayElement.setLineWith(300);
+                textDisplayElement.canSeeThrough(true);
+                textDisplayElement.alignment(TextDisplayElement.Alignment.LEFT);
+                textDisplayElement.setScale(new Vector3f(1.5f, 1.5f, 1.5f));
+                textDisplayElement.update();
             });
-            itemDisplayElement.setUnhoverAction(viewer -> {
-                itemDisplayElement.setGlowing(false);
-                itemDisplayElement.setScale(new Vector3f(1f, 1f, 1f));
-                itemDisplayElement.update();
+            textDisplayElement.setUnhoverAction(viewer -> {
+                textDisplayElement.setGlowing(false);
+                textDisplayElement.setBackgroundColor(null);
+                textDisplayElement.hasShadow(true);
+                textDisplayElement.setLineWith(200);
+                textDisplayElement.canSeeThrough(false);
+                textDisplayElement.alignment(TextDisplayElement.Alignment.CENTER);
+                textDisplayElement.setScale(new Vector3f(1f, 1f, 1f));
+                textDisplayElement.update();
             });
-            itemDisplayElement.setClickAction(viewer -> {
+            textDisplayElement.setClickAction(viewer -> {
                 player.sendMessage("You clicked the element!");
             });
-            itemDisplayElement.show();
+            textDisplayElement.show();
         }else{
-            itemDisplayElement.destroy();
-            itemDisplayElement = null;
+            textDisplayElement.destroy();
+            textDisplayElement = null;
         }
 
         return true;
