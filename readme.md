@@ -2,7 +2,7 @@
 
 ## ⚠ This project is still in development and is not ready for use in production.
 
-This library is a 3D GUI library for spigot/papermc plugins.
+This library is a 3D GUI library for spigot/papermc plugins (currently compatible only with Minecraft 1.21).
 It allows you to create 3D GUIs with ease in minecraft without mods or resource packs required.
 It is open-sourced and free to use.
 You can use it in your projects with credit to the original author.
