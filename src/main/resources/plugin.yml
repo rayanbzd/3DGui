@@ -1,0 +1,11 @@
+name: Gui3D
+version: ${project.version}
+author: Bazhard
+api-version: "1.21"
+main: dev.bazhard.library.gui3d.Gui3D
+depend:
+  - ProtocolLib
+commands:
+  gui3d:
+    description: Open the 3D GUI
+    permission: gui3d.use
