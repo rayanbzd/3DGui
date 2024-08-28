@@ -31,7 +31,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private Component customName;
     private Vector3f scale = new Vector3f(1, 1, 1);
     private Vector3f translation = new Vector3f(0, 0, 0);
-    private Quaternionf rotation = new Quaternionf(0, 0, 0, 1);
+    private Quaternionf rotationRight = new Quaternionf(0, 0, 0, 1);
+    private Quaternionf rotationLeft = new Quaternionf(0, 0, 0, 1);
     private HoverAction hover;
     private UnhoverAction unhover;
     private ClickAction click;
@@ -134,12 +135,21 @@ public abstract class GenericDisplayElement implements DisplayElement{
     }
 
     /**
-     * Get the rotation of the entity
-     * @return The rotation of the entity
+     * Get the rotation right of the entity
+     * @return The right rotation of the entity
      */
     @Override
-    public Quaternionf getRotation() {
-        return rotation;
+    public Quaternionf getRotationRight() {
+        return rotationRight;
+    }
+
+    /**
+     * Get the left rotation of the entity
+     * @return The left rotation of the entity
+     */
+    @Override
+    public Quaternionf getRotationLeft() {
+        return rotationLeft;
     }
 
     /**
@@ -263,13 +273,49 @@ public abstract class GenericDisplayElement implements DisplayElement{
     }
 
     /**
-     * Set the rotation of the entity
-     * @param rotation The rotation
+     * Set the rotation right of the entity
+     * @param rotation The right rotation
      * @return The display element
      */
     @Override
-    public DisplayElement setRotation(Quaternionf rotation) {
-        this.rotation = rotation;
+    public DisplayElement setRotationRight(Quaternionf rotation) {
+        this.rotationRight = rotation;
+        return this;
+    }
+
+    /**
+     * Set the rotation left of the entity
+     * @param rotation The left rotation
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setRotationLeft(Quaternionf rotation) {
+        this.rotationLeft = rotation;
+        return this;
+    }
+
+    @Override
+    public DisplayElement setRotation(float pitch, float yaw) {
+        // Convert degrees to radians
+        float pitchRad = (float) Math.toRadians(pitch);
+        float yawRad = (float) Math.toRadians(yaw);
+
+        // Calculate quaternion components
+        float cy = (float) Math.cos(yawRad * 0.5);
+        float sy = (float) Math.sin(yawRad * 0.5);
+        float cp = (float) Math.cos(pitchRad * 0.5);
+        float sp = (float) Math.sin(pitchRad * 0.5);
+
+        // Create quaternion
+        Quaternionf quaternion = new Quaternionf();
+        quaternion.x = sp * cy;
+        quaternion.y = -sy * cp;
+        quaternion.z = sy * sp;
+        quaternion.w = cp * cy;
+
+        this.rotationRight = new Quaternionf(0, 0, 0, 1);
+        this.rotationLeft = quaternion;
+
         return this;
     }
 
@@ -408,7 +454,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
 
         dataValues.add(new WrappedDataValue(12, WrappedDataSerializers.vector3fSerializer, getScale())); // Scale
 
-        dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation
+        dataValues.add(new WrappedDataValue(13, WrappedDataSerializers.quaternionfSerializer, getRotationLeft())); // Rotation left
+        dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotationRight())); // Rotation right
 
         dataValues.add(new WrappedDataValue(17, WrappedDataSerializers.floatSerializer, (float)(viewRangeInBlocks/64))); // View range (1F = 64 blocks)
 
