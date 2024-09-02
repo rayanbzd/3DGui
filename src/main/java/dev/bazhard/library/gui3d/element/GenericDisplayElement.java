@@ -6,7 +6,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import dev.bazhard.library.gui3d.Gui3D;
-import dev.bazhard.library.gui3d.WrappedDataSerializers;
+import dev.bazhard.library.gui3d.utils.WrappedDataSerializers;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;

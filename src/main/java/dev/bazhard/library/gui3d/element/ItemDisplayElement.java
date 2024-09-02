@@ -2,7 +2,7 @@ package dev.bazhard.library.gui3d.element;
 
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
-import dev.bazhard.library.gui3d.WrappedDataSerializers;
+import dev.bazhard.library.gui3d.utils.WrappedDataSerializers;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;

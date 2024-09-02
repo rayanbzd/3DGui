@@ -1,4 +1,4 @@
-package dev.bazhard.library.gui3d;
+package dev.bazhard.library.gui3d.utils;
 
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import org.joml.Quaternionf;

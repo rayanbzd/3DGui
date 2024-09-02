@@ -11,11 +11,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -53,26 +51,20 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
         if(!(sender instanceof Player player))return false;
 
         if(textDisplayElement == null) {
-            textDisplayElement = new TextDisplayElement(player, player.getLocation(), MiniMessage.miniMessage().deserialize("<gradient:red:blue>Test Test Test</gradient><newline><gradient:aqua:gold>Test Test Test</gradient>"));
+            textDisplayElement = new TextDisplayElement(player, player.getLocation(), MiniMessage.miniMessage().deserialize("Lorem ipsum dolor sit amet<newline>consectetur adipiscing<newline><b>sed do eiusmod tempor incididunt</b>"));
+            textDisplayElement.hasShadow(true);
+            textDisplayElement.setGlowColor(Color.LIME);
+            //textDisplayElement.setRotation(player.getPitch(), player.getYaw());
             textDisplayElement.setHoverAction(viewer -> {
                 textDisplayElement.setGlowing(true);
-                textDisplayElement.setGlowColor(Color.LIME);
                 textDisplayElement.setBackgroundColor(Color.ORANGE);
-                textDisplayElement.hasShadow(true);
-                textDisplayElement.setLineWith(300);
-                textDisplayElement.canSeeThrough(true);
-                textDisplayElement.alignment(TextDisplayElement.Alignment.LEFT);
-                textDisplayElement.setScale(new Vector3f(1.5f, 1.5f, 1.5f));
+                //textDisplayElement.setScale(new Vector3f(1.5f, 1.5f, 1.5f));
                 textDisplayElement.update();
             });
             textDisplayElement.setUnhoverAction(viewer -> {
                 textDisplayElement.setGlowing(false);
                 textDisplayElement.setBackgroundColor(null);
-                textDisplayElement.hasShadow(true);
-                textDisplayElement.setLineWith(200);
-                textDisplayElement.canSeeThrough(false);
-                textDisplayElement.alignment(TextDisplayElement.Alignment.CENTER);
-                textDisplayElement.setScale(new Vector3f(1f, 1f, 1f));
+                //textDisplayElement.setScale(new Vector3f(1f, 1f, 1f));
                 textDisplayElement.update();
             });
             textDisplayElement.setClickAction(viewer -> {
