@@ -39,6 +39,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private boolean cancelInteractEvent = false;
     private int viewRangeInBlocks = 64;
     private Billboard billboard = Billboard.FIXED;
+    private int brightnessOverride = -1;
 
     public GenericDisplayElement(Player viewer, Location location) {
         this.entityID = Gui3D.getInstance().getDisplayManager().getNextEntityID(viewer.getUniqueId());
@@ -166,6 +167,15 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public Billboard getBillboard() {
         return billboard;
+    }
+
+    /**
+     * Get the brightness override
+     * @return The brightness override
+     */
+    @Override
+    public int getBrightnessOverride() {
+        return brightnessOverride;
     }
 
     /**
@@ -369,6 +379,17 @@ public abstract class GenericDisplayElement implements DisplayElement{
     }
 
     /**
+     * Set the brightness override
+     * @param brightnessOverride The brightness override
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setBrightnessOverride(int brightnessOverride) {
+        this.brightnessOverride = brightnessOverride;
+        return this;
+    }
+
+    /**
      * Show the entity to the viewer
      */
     @Override
@@ -441,6 +462,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
         dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation right
 
         dataValues.add(new WrappedDataValue(15, WrappedDataSerializers.integerSerializer, getBillboard().getIntValue())); // Billboard
+
+        dataValues.add(new WrappedDataValue(16, WrappedDataSerializers.integerSerializer, getBrightnessOverride())); // Brightness override
 
         dataValues.add(new WrappedDataValue(17, WrappedDataSerializers.floatSerializer, (float)(viewRangeInBlocks/64))); // View range (1F = 64 blocks)
 

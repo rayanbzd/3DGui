@@ -44,6 +44,7 @@ public interface DisplayElement {
     boolean cancelInteractEvent();
     int getViewRangeInBlocks();
     Billboard getBillboard();
+    int getBrightnessOverride();
 
     DisplayElement setLocation(Location location);
     DisplayElement setGlowing(boolean glowing);
@@ -60,6 +61,7 @@ public interface DisplayElement {
     DisplayElement cancelInteractEvent(boolean cancel);
     DisplayElement setViewRangeInBlocks(int range);
     DisplayElement setBillboard(Billboard billboard);
+    DisplayElement setBrightnessOverride(int brightness);
 
     void show();
     void destroy();
