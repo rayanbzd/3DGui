@@ -10,11 +10,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -56,17 +56,18 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
             textDisplayElement.setRotation(player.getPitch(), player.getYaw());
             textDisplayElement.hasShadow(true);
             textDisplayElement.setGlowColor(Color.LIME);
-            //textDisplayElement.setRotation(player.getPitch(), player.getYaw());
+            textDisplayElement.setInterpolationPosRotateDuration(5);
+            textDisplayElement.setInterpolationTransformDuration(5);
             textDisplayElement.setHoverAction(viewer -> {
                 textDisplayElement.setGlowing(true);
-                textDisplayElement.setBackgroundColor(Color.ORANGE);
-                //textDisplayElement.setScale(new Vector3f(1.5f, 1.5f, 1.5f));
+                textDisplayElement.setBackgroundColor(Color.LIME);
+                textDisplayElement.setScale(new Vector3f(1.2f, 1.2f, 1.2f));
                 textDisplayElement.update();
             });
             textDisplayElement.setUnhoverAction(viewer -> {
                 textDisplayElement.setGlowing(false);
                 textDisplayElement.setBackgroundColor(null);
-                //textDisplayElement.setScale(new Vector3f(1f, 1f, 1f));
+                textDisplayElement.setScale(new Vector3f(1f, 1f, 1f));
                 textDisplayElement.update();
             });
             textDisplayElement.setClickAction(viewer -> {

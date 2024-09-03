@@ -527,7 +527,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
         //dataValues.add(new WrappedDataValue(13, WrappedDataSerializers.quaternionfSerializer, getRotationLeft())); // Rotation left
         dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation right
 
-        dataValues.add(new WrappedDataValue(15, WrappedDataSerializers.integerSerializer, getBillboard().getIntValue())); // Billboard
+        dataValues.add(new WrappedDataValue(15, WrappedDataSerializers.byteSerializer, getBillboard().getByteValue())); // Billboard
 
         dataValues.add(new WrappedDataValue(16, WrappedDataSerializers.integerSerializer, getBrightnessOverride())); // Brightness override
 

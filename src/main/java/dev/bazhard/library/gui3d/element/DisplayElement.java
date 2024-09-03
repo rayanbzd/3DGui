@@ -79,19 +79,19 @@ public interface DisplayElement {
     boolean isLookedAtByViewer(int maxDistance);
 
     enum Billboard{
-        FIXED(0),
-        VERTICAL(1),
-        HORIZONTAL(2),
-        CENTER(3);
+        FIXED((byte) 0),
+        VERTICAL((byte) 1),
+        HORIZONTAL((byte) 2),
+        CENTER((byte) 3);
 
-        private final int intValue;
+        private final byte byteValue;
 
-        Billboard(int intValue){
-            this.intValue = intValue;
+        Billboard(byte byteValue){
+            this.byteValue = byteValue;
         }
 
-        public int getIntValue() {
-            return intValue;
+        public byte getByteValue() {
+            return byteValue;
         }
     }
 
