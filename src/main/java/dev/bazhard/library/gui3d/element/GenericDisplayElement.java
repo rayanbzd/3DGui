@@ -38,6 +38,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private int maxInteractionDistance = 10;
     private boolean cancelInteractEvent = false;
     private int viewRangeInBlocks = 64;
+    private Billboard billboard = Billboard.FIXED;
 
     public GenericDisplayElement(Player viewer, Location location) {
         this.entityID = Gui3D.getInstance().getDisplayManager().getNextEntityID(viewer.getUniqueId());
@@ -156,6 +157,15 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public int getMaxInteractionDistance() {
         return maxInteractionDistance;
+    }
+
+    /**
+     * Get the billboard type
+     * @return The billboard type
+     */
+    @Override
+    public Billboard getBillboard() {
+        return billboard;
     }
 
     /**
@@ -348,6 +358,17 @@ public abstract class GenericDisplayElement implements DisplayElement{
     }
 
     /**
+     * Set the billboard type
+     * @param billboard The billboard type
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setBillboard(Billboard billboard) {
+        this.billboard = billboard;
+        return this;
+    }
+
+    /**
      * Show the entity to the viewer
      */
     @Override
@@ -418,6 +439,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
 
         //dataValues.add(new WrappedDataValue(13, WrappedDataSerializers.quaternionfSerializer, getRotationLeft())); // Rotation left
         dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation right
+
+        dataValues.add(new WrappedDataValue(15, WrappedDataSerializers.integerSerializer, getBillboard().getIntValue())); // Billboard
 
         dataValues.add(new WrappedDataValue(17, WrappedDataSerializers.floatSerializer, (float)(viewRangeInBlocks/64))); // View range (1F = 64 blocks)
 

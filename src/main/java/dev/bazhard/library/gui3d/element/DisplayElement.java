@@ -43,6 +43,7 @@ public interface DisplayElement {
     boolean isCurrentlyHovered();
     boolean cancelInteractEvent();
     int getViewRangeInBlocks();
+    Billboard getBillboard();
 
     DisplayElement setLocation(Location location);
     DisplayElement setGlowing(boolean glowing);
@@ -58,6 +59,7 @@ public interface DisplayElement {
     DisplayElement setMaxInteractionDistance(int distance);
     DisplayElement cancelInteractEvent(boolean cancel);
     DisplayElement setViewRangeInBlocks(int range);
+    DisplayElement setBillboard(Billboard billboard);
 
     void show();
     void destroy();
@@ -67,5 +69,22 @@ public interface DisplayElement {
     void handleClick(Player viewer);
 
     boolean isLookedAtByViewer(int maxDistance);
+
+    enum Billboard{
+        FIXED(0),
+        VERTICAL(1),
+        HORIZONTAL(2),
+        CENTER(3);
+
+        private final int intValue;
+
+        Billboard(int intValue){
+            this.intValue = intValue;
+        }
+
+        public int getIntValue() {
+            return intValue;
+        }
+    }
 
 }
