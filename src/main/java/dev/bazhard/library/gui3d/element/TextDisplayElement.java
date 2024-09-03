@@ -7,11 +7,14 @@ import dev.bazhard.library.gui3d.utils.WrappedDataSerializers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +29,15 @@ public class TextDisplayElement extends GenericDisplayElement{
     private Component component;
     private Color backgroundColor;
     private Byte textOpacity;
-    private Integer lineWith = 200;
-    private float lines = 1;
+    private Integer linePixelWidth = 200;
+    private int numberOflines = 1;
     private boolean hasShadow = false;
     private boolean canSeeThrough = false;
     private Alignment alignment = Alignment.CENTER;
+
+    private float scaleWidth;
+    private float scaleHeight;
+    private Location center;
 
     public TextDisplayElement(Player viewer, Location location, Component component) {
         super(viewer, location);
@@ -51,8 +58,8 @@ public class TextDisplayElement extends GenericDisplayElement{
         this.textOpacity = textOpacity;
     }
 
-    public void setLineWith(Integer lineWith) {
-        this.lineWith = lineWith;
+    public void setLinePixelWidth(Integer linePixelWidth) {
+        this.linePixelWidth = linePixelWidth;
     }
 
     public void hasShadow(boolean hasShadow) {
@@ -79,8 +86,8 @@ public class TextDisplayElement extends GenericDisplayElement{
         return textOpacity;
     }
 
-    public Integer getLineWith() {
-        return lineWith;
+    public Integer getLinePixelWidth() {
+        return linePixelWidth;
     }
 
     public boolean hasShadow() {
@@ -96,19 +103,40 @@ public class TextDisplayElement extends GenericDisplayElement{
     }
 
     @Override
-    public BoundingBox getBoundingBox() {
-        float lineScaleWidth = lineWith/40F; // 40 pixels = 1 block at 1:1 scale
-        float lineScaleHeight = lines/4F; // 4 lines = 1 block at 1:1 scale
-        return BoundingBox.of( //TODO check why the height is not correct. Width looks fine btw
-                getLocation().clone().add(0, lineScaleHeight/2F, 0),
-                lineScaleWidth/2F,
-                lineScaleHeight/2F,
-                lineScaleWidth/2F);
+    public EntityType getEntityType() {
+        return EntityType.TEXT_DISPLAY;
     }
 
     @Override
-    public EntityType getEntityType() {
-        return EntityType.TEXT_DISPLAY;
+    public boolean isLookedAtByViewer(int maxDistance) {// TODO implement this with quad intersection check
+        Location center = this.center;
+        float scaledWidth = this.scaleWidth;
+        float scaledHeight = this.scaleHeight;
+        Quaternionf rotation = getRotation();
+        AxisAngle4f axisAngle = new AxisAngle4f();
+        axisAngle = rotation.get(axisAngle);
+        Vector axis = new Vector(axisAngle.x, axisAngle.y, axisAngle.z);
+
+        float angle = axisAngle.angle;
+        Location eyeLocation = getViewer().getEyeLocation();
+        Vector direction = eyeLocation.getDirection().normalize().multiply(maxDistance);
+
+        Segment segment = new Segment(eyeLocation, direction);
+        Vector i = new Vector(1, 0, 0);
+        Vector j = new Vector(0, 1, 0);
+        Vector k = new Vector(0, 0, 1);
+        if(!axis.isZero() && angle!=0){
+            i.rotateAroundAxis(axis, angle);
+            j.rotateAroundAxis(axis, angle);
+            k.rotateAroundAxis(axis, angle);
+        }
+        Referential referential = new Referential(center.toVector(),
+                i,
+                j,
+                k);
+
+        Quad quad = new Quad(referential, scaledWidth/2, scaledHeight/2);
+        return intersectionSegmentQuad(segment, quad, null);
     }
 
     @Override
@@ -118,7 +146,7 @@ public class TextDisplayElement extends GenericDisplayElement{
         values.add(new WrappedDataValue(23,  WrappedDataSerializers.componentSerializer,
                 WrappedChatComponent.fromJson(JSONComponentSerializer.json().serialize(component)).getHandle()));
 
-        values.add(new WrappedDataValue(24, WrappedDataSerializers.integerSerializer, Objects.requireNonNullElse(lineWith, 200)));
+        values.add(new WrappedDataValue(24, WrappedDataSerializers.integerSerializer, Objects.requireNonNullElse(linePixelWidth, 200)));
 
         if (backgroundColor != null) {
             values.add(new WrappedDataValue(25, WrappedDataSerializers.integerSerializer, backgroundColor.asARGB()));
@@ -161,7 +189,7 @@ public class TextDisplayElement extends GenericDisplayElement{
     }
 
     private void calculateComponentHeightWidth() { // TODO check to see if this is correct and to simplify it
-        int lines = 1;             // Number of lines in the text
+        int numberOflines = 1;             // Number of lines in the text
         int currentLineWidth = 0;  // The current width of the line in pixels
         int maxLineWidth = 0;      // The maximum width encountered among all lines
         boolean isBold = false;    // Flag to check if the text is bold
@@ -178,7 +206,7 @@ public class TextDisplayElement extends GenericDisplayElement{
                     case "newline": // Detect a newline tag
                         maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
                         currentLineWidth = 0;
-                        lines++;
+                        numberOflines++;
                         break;
                     case "bold": // Start of bold text
                         isBold = true;
@@ -197,7 +225,53 @@ public class TextDisplayElement extends GenericDisplayElement{
         }
 
         maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
-        this.lineWith = maxLineWidth; // 40 pixels = 1 block at 1:1 scale
-        this.lines = lines; // 4 lines = 1 block at 1:1 scale
+        this.linePixelWidth = maxLineWidth;
+        this.numberOflines = numberOflines;
+        this.scaleWidth = linePixelWidth/40F; // 40 pixels = 1 block at 1:1 scale
+        this.scaleHeight = numberOflines/4F; // 4 lines = 1 block at 1:1 scale
+        this.center = getLocation().clone().add(0, scaleHeight/2F, 0);
     }
+
+
+    //--------------------//
+    //TODO move this to a utility class
+
+    public static boolean intersectionSegmentPlane(Segment segment, Plane plane, Vector interPt) {
+        double vectorDotN = segment.vector.dot(plane.normal);
+        if (vectorDotN > -1e-3)
+            return false;
+        Vector v = segment.origin.toVector();
+        double t = (plane.distance - v.dot(plane.normal)) / vectorDotN;
+        if (t < 0 || t > 1)
+            return false;
+        v.add(segment.vector.clone().multiply(t));
+        if (interPt != null)
+            interPt.copy(v);
+        return true;
+    }
+    public static boolean intersectionSegmentQuad(Segment segment, Quad quad, Vector interPt) {
+        Vector interPtPlane = new Vector();
+        if (!intersectionSegmentPlane(segment, quad.asPlane(), interPtPlane))
+            return false;
+        Vector interPtLocal = globalToLocalPos(interPtPlane, quad.referential);
+        if (Math.abs(interPtLocal.getX()) > quad.extX || Math.abs(interPtLocal.getY()) > quad.extY)
+            return false;
+        if (interPt != null)
+            interPt.copy(interPtPlane);
+        return true;
+    }
+    public static Vector globalToLocalPos(Vector pos, Referential local) {
+        Vector v = pos.clone().subtract(local.origin);
+        return new Vector(v.dot(local.i), v.dot(local.j), v.dot(local.k));
+    }
+    public record Segment(Location origin, Vector vector) {}
+    public record Plane(Vector normal, double distance) {}
+    public record Referential(Vector origin, Vector i, Vector j, Vector k) {}
+    public record Quad(Referential referential, double extX, double extY) {
+        public Plane asPlane() {
+            return new Plane(this.referential.k, this.referential.origin.dot(this.referential.k));
+        }
+    }
+
+
 }

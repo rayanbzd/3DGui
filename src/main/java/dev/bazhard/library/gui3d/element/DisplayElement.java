@@ -5,7 +5,6 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BoundingBox;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -37,9 +36,7 @@ public interface DisplayElement {
     Component getCustomName();
     Vector3f getScale();
     Vector3f getTranslation();
-    Quaternionf getRotationRight();
-    Quaternionf getRotationLeft();
-    BoundingBox getBoundingBox();
+    Quaternionf getRotation();
     EntityType getEntityType();
     UUID getUUID();
     int getMaxInteractionDistance();
@@ -53,8 +50,7 @@ public interface DisplayElement {
     DisplayElement setCustomName(Component component);
     DisplayElement setScale(Vector3f scale);
     DisplayElement setTranslation(Vector3f translation);
-    DisplayElement setRotationRight(Quaternionf rotation);
-    DisplayElement setRotationLeft(Quaternionf rotation);
+    DisplayElement setRotation(Quaternionf rotation);
     DisplayElement setRotation(float pitch, float yaw);
     DisplayElement setHoverAction(HoverAction hover);
     DisplayElement setUnhoverAction(UnhoverAction unhover);

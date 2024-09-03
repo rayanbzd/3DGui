@@ -14,8 +14,6 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BoundingBox;
-import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -31,8 +29,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private Component customName;
     private Vector3f scale = new Vector3f(1, 1, 1);
     private Vector3f translation = new Vector3f(0, 0, 0);
-    private Quaternionf rotationRight = new Quaternionf(0, 0, 0, 1);
-    private Quaternionf rotationLeft = new Quaternionf(0, 0, 0, 1);
+    private Quaternionf rotation = new Quaternionf(0, 0, 0, 1);
     private HoverAction hover;
     private UnhoverAction unhover;
     private ClickAction click;
@@ -139,26 +136,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
      * @return The right rotation of the entity
      */
     @Override
-    public Quaternionf getRotationRight() {
-        return rotationRight;
-    }
-
-    /**
-     * Get the left rotation of the entity
-     * @return The left rotation of the entity
-     */
-    @Override
-    public Quaternionf getRotationLeft() {
-        return rotationLeft;
-    }
-
-    /**
-     * Get the bounding box of the entity
-     * @return The bounding box of the entity
-     */
-    @Override
-    public BoundingBox getBoundingBox() {
-        return null;
+    public Quaternionf getRotation() {
+        return rotation;
     }
 
     /**
@@ -278,47 +257,30 @@ public abstract class GenericDisplayElement implements DisplayElement{
      * @return The display element
      */
     @Override
-    public DisplayElement setRotationRight(Quaternionf rotation) {
-        this.rotationRight = rotation;
-        return this;
-    }
-
-    /**
-     * Set the rotation left of the entity
-     * @param rotation The left rotation
-     * @return The display element
-     */
-    @Override
-    public DisplayElement setRotationLeft(Quaternionf rotation) {
-        this.rotationLeft = rotation;
+    public DisplayElement setRotation(Quaternionf rotation) {
+        this.rotation = rotation;
         return this;
     }
 
     @Override
     public DisplayElement setRotation(float pitch, float yaw) {
-        // Convert degrees to radians
         float pitchRad = (float) Math.toRadians(pitch);
         float yawRad = (float) Math.toRadians(yaw);
 
-        // Calculate quaternion components
         float cy = (float) Math.cos(yawRad * 0.5);
         float sy = (float) Math.sin(yawRad * 0.5);
         float cp = (float) Math.cos(pitchRad * 0.5);
         float sp = (float) Math.sin(pitchRad * 0.5);
 
-        // Create quaternion
         Quaternionf quaternion = new Quaternionf();
         quaternion.x = sp * cy;
         quaternion.y = -sy * cp;
         quaternion.z = sy * sp;
         quaternion.w = cp * cy;
 
-        this.rotationRight = new Quaternionf(0, 0, 0, 1);
-        this.rotationLeft = quaternion;
-
+        this.rotation = quaternion;
         return this;
     }
-
     /**
      *  Set the hover action
      * @param hover The hover action
@@ -454,8 +416,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
 
         dataValues.add(new WrappedDataValue(12, WrappedDataSerializers.vector3fSerializer, getScale())); // Scale
 
-        dataValues.add(new WrappedDataValue(13, WrappedDataSerializers.quaternionfSerializer, getRotationLeft())); // Rotation left
-        dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotationRight())); // Rotation right
+        //dataValues.add(new WrappedDataValue(13, WrappedDataSerializers.quaternionfSerializer, getRotationLeft())); // Rotation left
+        dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation right
 
         dataValues.add(new WrappedDataValue(17, WrappedDataSerializers.floatSerializer, (float)(viewRangeInBlocks/64))); // View range (1F = 64 blocks)
 
@@ -473,80 +435,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
      * @return true if the viewer is looking at the entity bounding box within the maximum distance
      */
     @Override
-    public boolean isLookedAtByViewer(int maxDistance) {
-        if(!viewer.isOnline())return false;
-        Location playerLocation = viewer.getEyeLocation();
-        Vector direction = playerLocation.getDirection().normalize();
-
-        Vector entityMin = getBoundingBox().getMin();
-        Vector entityMax = getBoundingBox().getMax();
-
-        double invDirX = 1.0 / direction.getX();
-        double invDirY = 1.0 / direction.getY();
-        double invDirZ = 1.0 / direction.getZ();
-
-        double tMin, tMax, tyMin, tyMax, tzMin, tzMax;
-
-        if (invDirX >= 0) {
-            tMin = (entityMin.getX() - playerLocation.getX()) * invDirX;
-            tMax = (entityMax.getX() - playerLocation.getX()) * invDirX;
-        } else {
-            tMin = (entityMax.getX() - playerLocation.getX()) * invDirX;
-            tMax = (entityMin.getX() - playerLocation.getX()) * invDirX;
-        }
-
-        if (invDirY >= 0) {
-            tyMin = (entityMin.getY() - playerLocation.getY()) * invDirY;
-            tyMax = (entityMax.getY() - playerLocation.getY()) * invDirY;
-        } else {
-            tyMin = (entityMax.getY() - playerLocation.getY()) * invDirY;
-            tyMax = (entityMin.getY() - playerLocation.getY()) * invDirY;
-        }
-
-        if ((tMin > tyMax) || (tyMin > tMax)) {
-            return false; // No intersection on Y-axis.
-        }
-
-        if (tyMin > tMin) tMin = tyMin;
-        if (tyMax < tMax) tMax = tyMax;
-
-        if (invDirZ >= 0) {
-            tzMin = (entityMin.getZ() - playerLocation.getZ()) * invDirZ;
-            tzMax = (entityMax.getZ() - playerLocation.getZ()) * invDirZ;
-        } else {
-            tzMin = (entityMax.getZ() - playerLocation.getZ()) * invDirZ;
-            tzMax = (entityMin.getZ() - playerLocation.getZ()) * invDirZ;
-        }
-
-        if ((tMin > tzMax) || (tzMin > tMax)) {
-            return false; // No intersection on Z-axis.
-        }
-
-        if (tzMin > tMin) tMin = tzMin;
-        if (tzMax < tMax) tMax = tzMax;
-
-        return tMin < maxDistance && tMax > 0; // Check if the intersection is within the maximum distance
-    }
-
-    /* RayTracing (alternative, more precise method but less efficient)
-    @Override
-    public boolean isLookedAtByViewer(Player player, int maxDistance) {
-        Location playerLocation = player.getEyeLocation();
-        Vector direction = playerLocation.getDirection();
-
-        Vector entityMin = getBoundingBox().getMin();
-        Vector entityMax = getBoundingBox().getMax();
-
-        for (double i = 0; i < maxDistance; i += 0.01) {
-            Vector ray = direction.clone().multiply(i);
-            Vector point = playerLocation.toVector().add(ray);
-
-            if (point.isInAABB(entityMin, entityMax)) {
-                return true;  // Le joueur regarde l'entité
-            }
-        }
-        return false; // Le joueur ne regarde pas l'entité
-    }*/
+    public abstract boolean isLookedAtByViewer(int maxDistance);
 
     @Override
     public void handleHover(Player viewer){

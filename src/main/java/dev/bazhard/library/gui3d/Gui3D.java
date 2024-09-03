@@ -10,6 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,6 +53,7 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
 
         if(textDisplayElement == null) {
             textDisplayElement = new TextDisplayElement(player, player.getLocation(), MiniMessage.miniMessage().deserialize("Lorem ipsum dolor sit amet<newline>consectetur adipiscing<newline><b>sed do eiusmod tempor incididunt</b>"));
+            textDisplayElement.setRotation(player.getPitch(), player.getYaw());
             textDisplayElement.hasShadow(true);
             textDisplayElement.setGlowColor(Color.LIME);
             //textDisplayElement.setRotation(player.getPitch(), player.getYaw());
