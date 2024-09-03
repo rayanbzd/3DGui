@@ -40,6 +40,9 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private int viewRangeInBlocks = 64;
     private Billboard billboard = Billboard.FIXED;
     private int brightnessOverride = -1;
+    private int interpolationDelay = 0;
+    private int interpolationTransformDuration = 0;
+    private int interpolationPosRotateDuration = 0;
 
     public GenericDisplayElement(Player viewer, Location location) {
         this.entityID = Gui3D.getInstance().getDisplayManager().getNextEntityID(viewer.getUniqueId());
@@ -176,6 +179,33 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public int getBrightnessOverride() {
         return brightnessOverride;
+    }
+
+    /**
+     * Get the delay before the interpolation starts
+     * @return The delay before the interpolation starts
+     */
+    @Override
+    public int getInterpolationDelay() {
+        return interpolationDelay;
+    }
+
+    /**
+     * Get the duration of the interpolation for the transform
+     * @return The duration of the interpolation for the transform
+     */
+    @Override
+    public int getInterpolationTransformDuration() {
+        return interpolationTransformDuration;
+    }
+
+    /**
+     * Get the duration of the interpolation for the position and rotation
+     * @return The duration of the interpolation for the position and rotation
+     */
+    @Override
+    public int getInterpolationPosRotateDuration() {
+        return interpolationPosRotateDuration;
     }
 
     /**
@@ -390,6 +420,39 @@ public abstract class GenericDisplayElement implements DisplayElement{
     }
 
     /**
+     * Set the delay before the interpolation starts
+     * @param delay The delay before the interpolation starts
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setInterpolationDelay(int delay) {
+        this.interpolationDelay = delay;
+        return this;
+    }
+
+    /**
+     * Set the duration of the interpolation for the transform
+     * @param duration The duration of the interpolation for the transform
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setInterpolationTransformDuration(int duration) {
+        this.interpolationTransformDuration = duration;
+        return this;
+    }
+
+    /**
+     * Set the duration of the interpolation for the position and rotation
+     * @param duration The duration of the interpolation for the position and rotation
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setInterpolationPosRotateDuration(int duration) {
+        this.interpolationPosRotateDuration = duration;
+        return this;
+    }
+
+    /**
      * Show the entity to the viewer
      */
     @Override
@@ -443,9 +506,6 @@ public abstract class GenericDisplayElement implements DisplayElement{
         List<WrappedDataValue> dataValues = new ArrayList<>(); // Meta datas (https://wiki.vg/Entity_metadata#Entity_Metadata)
 
         dataValues.add(new WrappedDataValue(0, WrappedDataSerializers.byteSerializer, (byte) (isGlowing() ? 0x40 : 0x00))); // Glowing flag
-        if (isGlowing()) {
-            dataValues.add(new WrappedDataValue(22, WrappedDataSerializers.integerSerializer, getGlowColor().asRGB())); // Glowing color
-        }
 
         dataValues.add(new WrappedDataValue(3, WrappedDataSerializers.booleanSerializer, hasCustomName())); // Custom name visible
         if (hasCustomName()) {
@@ -453,6 +513,12 @@ public abstract class GenericDisplayElement implements DisplayElement{
                     Optional.of(WrappedChatComponent.fromJson(JSONComponentSerializer.json().serialize(getCustomName())).getHandle())
             ));
         }
+
+        dataValues.add(new WrappedDataValue(8, WrappedDataSerializers.integerSerializer, getInterpolationDelay())); // Interpolation delay
+
+        dataValues.add(new WrappedDataValue(9, WrappedDataSerializers.integerSerializer, getInterpolationTransformDuration())); // Interpolation transform duration
+
+        dataValues.add(new WrappedDataValue(10, WrappedDataSerializers.integerSerializer, getInterpolationPosRotateDuration())); // Interpolation position and rotation duration
 
         dataValues.add(new WrappedDataValue(11, WrappedDataSerializers.vector3fSerializer, getTranslation())); // Translation
 
@@ -466,6 +532,10 @@ public abstract class GenericDisplayElement implements DisplayElement{
         dataValues.add(new WrappedDataValue(16, WrappedDataSerializers.integerSerializer, getBrightnessOverride())); // Brightness override
 
         dataValues.add(new WrappedDataValue(17, WrappedDataSerializers.floatSerializer, (float)(viewRangeInBlocks/64))); // View range (1F = 64 blocks)
+
+        if (isGlowing()) {
+            dataValues.add(new WrappedDataValue(22, WrappedDataSerializers.integerSerializer, getGlowColor().asRGB())); // Glowing color
+        }
 
         List<WrappedDataValue> additionalDataValues = getAdditionalDataValues();
         if (additionalDataValues != null) dataValues.addAll(additionalDataValues);

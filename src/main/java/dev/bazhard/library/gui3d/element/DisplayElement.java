@@ -45,6 +45,9 @@ public interface DisplayElement {
     int getViewRangeInBlocks();
     Billboard getBillboard();
     int getBrightnessOverride();
+    int getInterpolationDelay();
+    int getInterpolationTransformDuration();
+    int getInterpolationPosRotateDuration();
 
     DisplayElement setLocation(Location location);
     DisplayElement setGlowing(boolean glowing);
@@ -62,6 +65,9 @@ public interface DisplayElement {
     DisplayElement setViewRangeInBlocks(int range);
     DisplayElement setBillboard(Billboard billboard);
     DisplayElement setBrightnessOverride(int brightness);
+    DisplayElement setInterpolationDelay(int delay);
+    DisplayElement setInterpolationTransformDuration(int duration);
+    DisplayElement setInterpolationPosRotateDuration(int duration);
 
     void show();
     void destroy();
