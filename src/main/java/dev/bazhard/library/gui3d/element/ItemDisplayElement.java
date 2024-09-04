@@ -41,7 +41,7 @@ public class ItemDisplayElement extends GenericDisplayElement {
     }
 
     @Override
-    public boolean isLookedAtByViewer(int maxDistance) {
+    public boolean isLookedAtByViewer(int maxDistance) { //TODO implement billboard rotation calculation
         if (!getViewer().isOnline()) return false;
 
         Location playerLocation = getViewer().getEyeLocation();
