@@ -1,11 +1,11 @@
 package dev.bazhard.library.gui3d;
 
+import dev.bazhard.library.gui3d.element.BlockDisplayElement;
 import dev.bazhard.library.gui3d.element.TextDisplayElement;
 import dev.bazhard.library.gui3d.listeners.DisplayElementClickListener;
 import dev.bazhard.library.gui3d.listeners.DisplayElementHoverListener;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,13 +45,37 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
     }
 
     private TextDisplayElement textDisplayElement;
+    private BlockDisplayElement blockDisplayElement;
 
     // This is a test command and should be removed
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String msg, @NotNull String[] args) {
         if(!(sender instanceof Player player))return false;
 
-        if(textDisplayElement == null) {
+        if(blockDisplayElement == null){
+            blockDisplayElement = (BlockDisplayElement) new BlockDisplayElement(player, player.getLocation(), Material.GLASS)
+                    .setInterpolationTransformDuration(5)
+                    .setScale(new Vector3f(1f, 1f, 1f))
+                    //.setTranslation(new Vector3f(-0.5F, -0.5F, -0.5F))
+                    .setHoverAction(viewer -> {
+                        blockDisplayElement.setGlowing(true)
+                                //.setTranslation(new Vector3f(-0.6F, -0.6F, -0.6F))
+                                .setScale(new Vector3f(1.2f, 1.2f, 1.2f));
+                        blockDisplayElement.update();
+                    })
+                    .setUnhoverAction(viewer -> {
+                        blockDisplayElement.setGlowing(false)
+                                //.setTranslation(new Vector3f(-0.5F, -0.5F, -0.5F))
+                                .setScale(new Vector3f(1f, 1f, 1f));
+                        blockDisplayElement.update();
+                    });
+            blockDisplayElement.show();
+        }else{
+            blockDisplayElement.destroy();
+            blockDisplayElement = null;
+        }
+
+        /*if(textDisplayElement == null) {
             textDisplayElement = new TextDisplayElement(player, player.getLocation(), MiniMessage.miniMessage().deserialize("Lorem ipsum dolor sit amet<newline>consectetur adipiscing<newline><b>sed do eiusmod tempor incididunt</b>"));
             textDisplayElement.setRotation(player.getPitch(), player.getYaw());
             textDisplayElement.hasShadow(true);
@@ -77,7 +101,7 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
         }else{
             textDisplayElement.destroy();
             textDisplayElement = null;
-        }
+        }*/
 
         return true;
     }

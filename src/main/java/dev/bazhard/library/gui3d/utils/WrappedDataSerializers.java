@@ -15,5 +15,5 @@ public class WrappedDataSerializers {
     public static WrappedDataWatcher.Serializer componentSerializer = WrappedDataWatcher.Registry.getChatComponentSerializer(false);
     public static WrappedDataWatcher.Serializer optionalComponentSerializer = WrappedDataWatcher.Registry.getChatComponentSerializer(true);
     public static WrappedDataWatcher.Serializer itemStackSerializer = WrappedDataWatcher.Registry.getItemStackSerializer(false);
-
+    public static WrappedDataWatcher.Serializer blockDataSerializer = WrappedDataWatcher.Registry.getBlockDataSerializer(false);
 }

@@ -108,7 +108,7 @@ public class TextDisplayElement extends GenericDisplayElement{
     }
 
     @Override
-    public boolean isLookedAtByViewer(int maxDistance) {// TODO implement this with quad intersection check
+    public boolean isLookedAtByViewer(int maxDistance) {//TODO implement billboard and translation calculation
         Location center = this.center;
         float scaledWidth = this.scaleWidth;
         float scaledHeight = this.scaleHeight;

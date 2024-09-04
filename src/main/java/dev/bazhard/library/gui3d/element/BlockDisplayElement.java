@@ -1,43 +1,43 @@
 package dev.bazhard.library.gui3d.element;
 
-import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import dev.bazhard.library.gui3d.utils.WrappedDataSerializers;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.List;
 
-public class ItemDisplayElement extends GenericDisplayElement {
+public class BlockDisplayElement extends GenericDisplayElement{
 
-    private ItemStack itemStack;
+    private Material material;
 
-    public ItemDisplayElement(Player viewer, Location location, ItemStack itemStack) {
+    public BlockDisplayElement(Player viewer, Location location, Material material) {
         super(viewer, location);
-        this.itemStack = itemStack;
+        this.material = material;
     }
 
-    public ItemStack getItemStack() {
-        return itemStack;
+    public Material getMaterial() {
+        return material;
     }
 
-    public DisplayElement setItemStack(ItemStack itemStack) {
-        this.itemStack = itemStack;
+    public DisplayElement setMaterial(Material material) {
+        this.material = material;
         return this;
     }
 
     public BoundingBox getBoundingBox() {
         //TODO implement translation calculation
-        return BoundingBox.of(getLocation(), getScale().x()/2, getScale().y()/2, getScale().z()/2);
+        return BoundingBox.of(getLocation().clone().add(getScale().x/2, getScale().y/2, getScale().z/2), getScale().x()/2, getScale().y()/2, getScale().z()/2);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.ITEM_DISPLAY;
+        return EntityType.BLOCK_DISPLAY;
     }
 
     @Override
@@ -77,10 +77,8 @@ public class ItemDisplayElement extends GenericDisplayElement {
 
     @Override
     protected List<WrappedDataValue> getAdditionalDataValues(){ // https://wiki.vg/Entity_metadata#Item_Display
-        return List.of(new WrappedDataValue(23, WrappedDataSerializers.itemStackSerializer,
-                MinecraftReflection.getMinecraftItemStack(getItemStack())));                                            // ItemStack data
+        return List.of(new WrappedDataValue(23,  WrappedDataSerializers.blockDataSerializer,
+                WrappedBlockData.createData(getMaterial()).getHandle()));
     }
-
-
 
 }
