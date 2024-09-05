@@ -30,7 +30,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private Component customName;
     private Vector3f scale = new Vector3f(1, 1, 1);
     private Vector3f translation = new Vector3f(0, 0, 0);
-    private Quaternionf rotation = new Quaternionf(0, 0, 0, 1);
+    private Quaternionf rotationLeft = new Quaternionf(0, 0, 0, 1);
+    private Quaternionf rotationRight = new Quaternionf(0, 0, 0, 1);
     private HoverAction hover;
     private UnhoverAction unhover;
     private ClickAction click;
@@ -143,12 +144,21 @@ public abstract class GenericDisplayElement implements DisplayElement{
     }
 
     /**
+     * Get the rotation left of the entity
+     * @return The left rotation of the entity
+     */
+    @Override
+    public Quaternionf getRotationLeft() {
+        return rotationLeft;
+    }
+
+    /**
      * Get the rotation right of the entity
      * @return The right rotation of the entity
      */
     @Override
-    public Quaternionf getRotation() {
-        return rotation;
+    public Quaternionf getRotationRight() {
+        return rotationRight;
     }
 
     /**
@@ -320,36 +330,41 @@ public abstract class GenericDisplayElement implements DisplayElement{
     }
 
     /**
-     * Set the rotation right of the entity
-     * @param rotation The right rotation
+     * Set the rotation left of the entity
+     * @param rotationLeft The left rotation
      * @return The display element
      */
     @Override
-    public DisplayElement setRotation(Quaternionf rotation) {
-        this.rotation = rotation;
-        pendingUpdates.put(14, new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation right
+    public DisplayElement setRotationLeft(Quaternionf rotationLeft) {
+        this.rotationLeft = rotationLeft;
+        pendingUpdates.put(13, new WrappedDataValue(13, WrappedDataSerializers.quaternionfSerializer, getRotationLeft())); // Rotation right
         return this;
     }
 
     @Override
-    public DisplayElement setRotation(float pitch, float yaw) {
-        float pitchRad = (float) Math.toRadians(pitch);
-        float yawRad = (float) Math.toRadians(yaw);
-
-        float cy = (float) Math.cos(yawRad * 0.5);
-        float sy = (float) Math.sin(yawRad * 0.5);
-        float cp = (float) Math.cos(pitchRad * 0.5);
-        float sp = (float) Math.sin(pitchRad * 0.5);
-
-        Quaternionf quaternion = new Quaternionf();
-        quaternion.x = sp * cy;
-        quaternion.y = -sy * cp;
-        quaternion.z = sy * sp;
-        quaternion.w = cp * cy;
-
-        setRotation(quaternion);
+    public DisplayElement setRotationLeft(float pitch, float yaw) {
+        setRotationLeft(pitchYawToQuaternion(pitch, yaw));
         return this;
     }
+
+    /**
+     * Set the rotation right of the entity
+     * @param rotationRight The right rotation
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setRotationRight(Quaternionf rotationRight) {
+        this.rotationRight = rotationRight;
+        pendingUpdates.put(14, new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotationRight())); // Rotation right
+        return this;
+    }
+
+    @Override
+    public DisplayElement setRotationRight(float pitch, float yaw) {
+        setRotationRight(pitchYawToQuaternion(pitch, yaw));
+        return this;
+    }
+
     /**
      *  Set the hover action
      * @param hover The hover action
@@ -568,6 +583,24 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public void handleClick(Player viewer){
         if(click != null)click.onClick(viewer);
+    }
+
+    private Quaternionf pitchYawToQuaternion(float pitch, float yaw){
+        float pitchRad = (float) Math.toRadians(pitch);
+        float yawRad = (float) Math.toRadians(yaw);
+
+        float cy = (float) Math.cos(yawRad * 0.5);
+        float sy = (float) Math.sin(yawRad * 0.5);
+        float cp = (float) Math.cos(pitchRad * 0.5);
+        float sp = (float) Math.sin(pitchRad * 0.5);
+
+        Quaternionf quaternion = new Quaternionf();
+        quaternion.x = sp * cy;
+        quaternion.y = -sy * cp;
+        quaternion.z = sy * sp;
+        quaternion.w = cp * cy;
+
+        return quaternion;
     }
 
 }

@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -53,22 +54,13 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
         if(!(sender instanceof Player player))return false;
 
         if(blockDisplayElement == null){
-            blockDisplayElement = (BlockDisplayElement) new BlockDisplayElement(player, player.getLocation(), Material.GLASS)
-                    .setInterpolationTransformDuration(5)
-                    .setScale(new Vector3f(1f, 1f, 1f))
-                    //.setTranslation(new Vector3f(-0.5F, -0.5F, -0.5F))
-                    .setHoverAction(viewer -> {
-                        blockDisplayElement.setGlowing(true)
-                                //.setTranslation(new Vector3f(-0.6F, -0.6F, -0.6F))
-                                .setScale(new Vector3f(1.2f, 1.2f, 1.2f));
-                        blockDisplayElement.update();
-                    })
-                    .setUnhoverAction(viewer -> {
-                        blockDisplayElement.setGlowing(false)
-                                //.setTranslation(new Vector3f(-0.5F, -0.5F, -0.5F))
-                                .setScale(new Vector3f(1f, 1f, 1f));
-                        blockDisplayElement.update();
-                    });
+            // Définir la rotation
+            Quaternionf rotation = new Quaternionf().rotateY((float) Math.toRadians(45));
+
+            // Créer le BlockDisplayElement et l'afficher
+            blockDisplayElement = new BlockDisplayElement(player, player.getLocation(), Material.WHITE_CONCRETE);
+            blockDisplayElement.setRotationLeft(rotation);
+            blockDisplayElement.setScale(new Vector3f(0.1f, 0.1f, 1f));
             blockDisplayElement.show();
         }else{
             blockDisplayElement.destroy();

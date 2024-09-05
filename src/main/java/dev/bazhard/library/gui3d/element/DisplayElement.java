@@ -36,7 +36,8 @@ public interface DisplayElement {
     Component getCustomName();
     Vector3f getScale();
     Vector3f getTranslation();
-    Quaternionf getRotation();
+    Quaternionf getRotationLeft();
+    Quaternionf getRotationRight();
     EntityType getEntityType();
     UUID getUUID();
     int getMaxInteractionDistance();
@@ -55,8 +56,10 @@ public interface DisplayElement {
     DisplayElement setCustomName(Component component);
     DisplayElement setScale(Vector3f scale);
     DisplayElement setTranslation(Vector3f translation);
-    DisplayElement setRotation(Quaternionf rotation);
-    DisplayElement setRotation(float pitch, float yaw);
+    DisplayElement setRotationRight(Quaternionf rotation);
+    DisplayElement setRotationRight(float pitch, float yaw);
+    DisplayElement setRotationLeft(Quaternionf rotation);
+    DisplayElement setRotationLeft(float pitch, float yaw);
     DisplayElement setHoverAction(HoverAction hover);
     DisplayElement setUnhoverAction(UnhoverAction unhover);
     DisplayElement setClickAction(ClickAction click);

@@ -119,7 +119,7 @@ public class TextDisplayElement extends GenericDisplayElement{
         Location center = this.center;
         float scaledWidth = this.scaleWidth;
         float scaledHeight = this.scaleHeight;
-        Quaternionf rotation = getRotation();
+        Quaternionf rotation = getRotationLeft(); //TODO check also for right rotation ?
         AxisAngle4f axisAngle = new AxisAngle4f();
         axisAngle = rotation.get(axisAngle);
         Vector axis = new Vector(axisAngle.x, axisAngle.y, axisAngle.z);
