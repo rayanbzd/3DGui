@@ -4,8 +4,9 @@ import dev.bazhard.library.gui3d.element.BlockDisplayElement;
 import dev.bazhard.library.gui3d.element.TextDisplayElement;
 import dev.bazhard.library.gui3d.listeners.DisplayElementClickListener;
 import dev.bazhard.library.gui3d.listeners.DisplayElementHoverListener;
+import dev.bazhard.library.gui3d.utils.AABBVisualizer;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,9 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -47,24 +47,29 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
 
     private TextDisplayElement textDisplayElement;
     private BlockDisplayElement blockDisplayElement;
+    private Location loc1, loc2;
+    private AABBVisualizer aabbVisualizer;
 
     // This is a test command and should be removed
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String msg, @NotNull String[] args) {
         if(!(sender instanceof Player player))return false;
 
-        if(blockDisplayElement == null){
-            // Définir la rotation
-            Quaternionf rotation = new Quaternionf().rotateY((float) Math.toRadians(45));
+        //Block b = p.getTargetBlockExact(10);
+        //if(b==null)return false;
+        if (loc1 == null) {
+            loc1 = player.getLocation();
+            player.sendMessage("Location 1 set");
+        } else if (loc2 == null) {
+            loc2 = player.getLocation();
+            player.sendMessage("Location 2 set");
 
-            // Créer le BlockDisplayElement et l'afficher
-            blockDisplayElement = new BlockDisplayElement(player, player.getLocation(), Material.WHITE_CONCRETE);
-            blockDisplayElement.setRotationLeft(rotation);
-            blockDisplayElement.setScale(new Vector3f(0.1f, 0.1f, 1f));
-            blockDisplayElement.show();
-        }else{
-            blockDisplayElement.destroy();
-            blockDisplayElement = null;
+            aabbVisualizer = new AABBVisualizer(player, BoundingBox.of(loc1, loc2), 0.025F);
+            aabbVisualizer.show();
+        } else {
+            aabbVisualizer.hide();
+            loc1 = null;
+            loc2 = null;
         }
 
         /*if(textDisplayElement == null) {

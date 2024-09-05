@@ -324,8 +324,8 @@ public abstract class GenericDisplayElement implements DisplayElement{
      */
     @Override
     public DisplayElement setTranslation(Vector3f translation) {
-        pendingUpdates.put(11, new WrappedDataValue(11, WrappedDataSerializers.vector3fSerializer, getTranslation())); // Translation
         this.translation = translation;
+        pendingUpdates.put(11, new WrappedDataValue(11, WrappedDataSerializers.vector3fSerializer, getTranslation())); // Translation
         return this;
     }
 
