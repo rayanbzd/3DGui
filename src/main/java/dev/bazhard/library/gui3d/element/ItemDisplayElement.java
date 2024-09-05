@@ -10,15 +10,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
-import java.util.List;
-
 public class ItemDisplayElement extends GenericDisplayElement {
 
     private ItemStack itemStack;
 
     public ItemDisplayElement(Player viewer, Location location, ItemStack itemStack) {
         super(viewer, location);
-        this.itemStack = itemStack;
+        setItemStack(itemStack);
     }
 
     public ItemStack getItemStack() {
@@ -27,6 +25,8 @@ public class ItemDisplayElement extends GenericDisplayElement {
 
     public DisplayElement setItemStack(ItemStack itemStack) {
         this.itemStack = itemStack;
+        getPendingUpdates().put(23, new WrappedDataValue(23, WrappedDataSerializers.itemStackSerializer,
+                MinecraftReflection.getMinecraftItemStack(getItemStack())));
         return this;
     }
 
@@ -74,13 +74,5 @@ public class ItemDisplayElement extends GenericDisplayElement {
 
         return tMin[0] < maxDistance && tMax[0] > 0;
     }
-
-    @Override
-    protected List<WrappedDataValue> getAdditionalDataValues(){ // https://wiki.vg/Entity_metadata#Item_Display
-        return List.of(new WrappedDataValue(23, WrappedDataSerializers.itemStackSerializer,
-                MinecraftReflection.getMinecraftItemStack(getItemStack())));                                            // ItemStack data
-    }
-
-
 
 }

@@ -10,6 +10,7 @@ import dev.bazhard.library.gui3d.utils.WrappedDataSerializers;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -43,6 +44,11 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private int interpolationDelay = 0;
     private int interpolationTransformDuration = 0;
     private int interpolationPosRotateDuration = 0;
+
+    private final Map<Integer, WrappedDataValue> pendingUpdates = new HashMap<>();
+    public Map<Integer, WrappedDataValue> getPendingUpdates() {
+        return pendingUpdates;
+    }
 
     public GenericDisplayElement(Player viewer, Location location) {
         this.entityID = Gui3D.getInstance().getDisplayManager().getNextEntityID(viewer.getUniqueId());
@@ -254,6 +260,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setGlowing(boolean glowing) {
         this.glowing = glowing;
+        pendingUpdates.put(0, new WrappedDataValue(0, WrappedDataSerializers.byteSerializer, (byte) (isGlowing() ? 0x40 : 0x00))); // Glowing flag
         return this;
     }
 
@@ -265,6 +272,9 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setGlowColor(Color color) {
         this.glowColor = color;
+        if (isGlowing()) {
+            pendingUpdates.put(22, new WrappedDataValue(22, WrappedDataSerializers.integerSerializer, getGlowColor().asRGB())); // Glowing color
+        }
         return this;
     }
 
@@ -276,6 +286,12 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setCustomName(Component component) {
         this.customName = component;
+        pendingUpdates.put(3, new WrappedDataValue(3, WrappedDataSerializers.booleanSerializer, hasCustomName())); // Custom name visible
+        if (hasCustomName()) {
+            pendingUpdates.put(2, new WrappedDataValue(2, WrappedDataSerializers.optionalComponentSerializer, // Custom name
+                    Optional.of(WrappedChatComponent.fromJson(JSONComponentSerializer.json().serialize(getCustomName())).getHandle())
+            ));
+        }
         return this;
     }
 
@@ -287,6 +303,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setScale(Vector3f scale) {
         this.scale = scale;
+        pendingUpdates.put(12, new WrappedDataValue(12, WrappedDataSerializers.vector3fSerializer, getScale())); // Scale
         return this;
     }
 
@@ -297,6 +314,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
      */
     @Override
     public DisplayElement setTranslation(Vector3f translation) {
+        pendingUpdates.put(11, new WrappedDataValue(11, WrappedDataSerializers.vector3fSerializer, getTranslation())); // Translation
         this.translation = translation;
         return this;
     }
@@ -309,6 +327,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setRotation(Quaternionf rotation) {
         this.rotation = rotation;
+        pendingUpdates.put(14, new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation right
         return this;
     }
 
@@ -328,7 +347,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
         quaternion.z = sy * sp;
         quaternion.w = cp * cy;
 
-        this.rotation = quaternion;
+        setRotation(quaternion);
         return this;
     }
     /**
@@ -394,6 +413,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setViewRangeInBlocks(int range) {
         this.viewRangeInBlocks = range;
+        pendingUpdates.put(17, new WrappedDataValue(17, WrappedDataSerializers.floatSerializer, (float)(viewRangeInBlocks/64))); // View range (1F = 64 blocks)
         return this;
     }
 
@@ -405,6 +425,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setBillboard(Billboard billboard) {
         this.billboard = billboard;
+        pendingUpdates.put(15, new WrappedDataValue(15, WrappedDataSerializers.byteSerializer, getBillboard().getByteValue())); // Billboard
         return this;
     }
 
@@ -416,6 +437,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setBrightnessOverride(int brightnessOverride) {
         this.brightnessOverride = brightnessOverride;
+        pendingUpdates.put(16, new WrappedDataValue(16, WrappedDataSerializers.integerSerializer, getBrightnessOverride())); // Brightness override
         return this;
     }
 
@@ -427,6 +449,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setInterpolationDelay(int delay) {
         this.interpolationDelay = delay;
+        pendingUpdates.put(8, new WrappedDataValue(8, WrappedDataSerializers.integerSerializer, getInterpolationDelay())); // Interpolation delay
         return this;
     }
 
@@ -438,6 +461,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setInterpolationTransformDuration(int duration) {
         this.interpolationTransformDuration = duration;
+        pendingUpdates.put(9, new WrappedDataValue(9, WrappedDataSerializers.integerSerializer, getInterpolationTransformDuration())); // Interpolation transform duration
         return this;
     }
 
@@ -449,6 +473,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public DisplayElement setInterpolationPosRotateDuration(int duration) {
         this.interpolationPosRotateDuration = duration;
+        pendingUpdates.put(10, new WrappedDataValue(10, WrappedDataSerializers.integerSerializer, getInterpolationPosRotateDuration())); // Interpolation position and rotation duration
         return this;
     }
 
@@ -503,46 +528,19 @@ public abstract class GenericDisplayElement implements DisplayElement{
 
         PacketContainer metaDataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA); // Apply meta data packet (https://wiki.vg/Protocol#Set_Entity_Metadata)
         metaDataPacket.getIntegers().write(0, getEntityID()); // Entity ID
-        List<WrappedDataValue> dataValues = new ArrayList<>(); // Meta datas (https://wiki.vg/Entity_metadata#Entity_Metadata)
 
-        dataValues.add(new WrappedDataValue(0, WrappedDataSerializers.byteSerializer, (byte) (isGlowing() ? 0x40 : 0x00))); // Glowing flag
+        // Meta datas (https://wiki.vg/Entity_metadata#Entity_Metadata)
+        List<WrappedDataValue> dataValues = new ArrayList<>(pendingUpdates.values());
 
-        dataValues.add(new WrappedDataValue(3, WrappedDataSerializers.booleanSerializer, hasCustomName())); // Custom name visible
-        if (hasCustomName()) {
-            dataValues.add(new WrappedDataValue(2, WrappedDataSerializers.optionalComponentSerializer, // Custom name
-                    Optional.of(WrappedChatComponent.fromJson(JSONComponentSerializer.json().serialize(getCustomName())).getHandle())
-            ));
+        //DEBUG
+        for(WrappedDataValue dataValue : dataValues){
+            Bukkit.broadcastMessage("DataValue: " + dataValue.getIndex() + " " + dataValue.getValue());
         }
-
-        dataValues.add(new WrappedDataValue(8, WrappedDataSerializers.integerSerializer, getInterpolationDelay())); // Interpolation delay
-
-        dataValues.add(new WrappedDataValue(9, WrappedDataSerializers.integerSerializer, getInterpolationTransformDuration())); // Interpolation transform duration
-
-        dataValues.add(new WrappedDataValue(10, WrappedDataSerializers.integerSerializer, getInterpolationPosRotateDuration())); // Interpolation position and rotation duration
-
-        dataValues.add(new WrappedDataValue(11, WrappedDataSerializers.vector3fSerializer, getTranslation())); // Translation
-
-        dataValues.add(new WrappedDataValue(12, WrappedDataSerializers.vector3fSerializer, getScale())); // Scale
-
-        //dataValues.add(new WrappedDataValue(13, WrappedDataSerializers.quaternionfSerializer, getRotationLeft())); // Rotation left
-        dataValues.add(new WrappedDataValue(14, WrappedDataSerializers.quaternionfSerializer, getRotation())); // Rotation right
-
-        dataValues.add(new WrappedDataValue(15, WrappedDataSerializers.byteSerializer, getBillboard().getByteValue())); // Billboard
-
-        dataValues.add(new WrappedDataValue(16, WrappedDataSerializers.integerSerializer, getBrightnessOverride())); // Brightness override
-
-        dataValues.add(new WrappedDataValue(17, WrappedDataSerializers.floatSerializer, (float)(viewRangeInBlocks/64))); // View range (1F = 64 blocks)
-
-        if (isGlowing()) {
-            dataValues.add(new WrappedDataValue(22, WrappedDataSerializers.integerSerializer, getGlowColor().asRGB())); // Glowing color
-        }
-
-        List<WrappedDataValue> additionalDataValues = getAdditionalDataValues();
-        if (additionalDataValues != null) dataValues.addAll(additionalDataValues);
 
         metaDataPacket.getDataValueCollectionModifier().write(0, dataValues);
 
         ProtocolLibrary.getProtocolManager().sendServerPacket(getViewer(), metaDataPacket);
+        pendingUpdates.clear();
     }
 
     /**
@@ -572,5 +570,4 @@ public abstract class GenericDisplayElement implements DisplayElement{
         if(click != null)click.onClick(viewer);
     }
 
-    protected abstract List<WrappedDataValue> getAdditionalDataValues();
 }
