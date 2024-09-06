@@ -1,0 +1,42 @@
+name: Deploy
+on: push
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java & Gradle
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+      - name: Compute version
+        id: compute-version
+        env:
+          SNAPSHOT_VERSION_SUFFIX: -SNAPSHOT
+          REF: ${{ github.ref_name == github.event.repository.default_branch && '' || format('-{0}', github.ref_name) }}
+        run: |
+          # Get current version of project
+          version=$(gradle printVersion -q --console=plain)
+          # Check if version ends with snapshot suffix
+          if [ ${version:(-${#SNAPSHOT_VERSION_SUFFIX})} ]; then
+            # Insert ref before snapshot suffix
+            version=${version%$SNAPSHOT_VERSION_SUFFIX}$REF$SNAPSHOT_VERSION_SUFFIX
+          else
+            # Append ref to the version
+            version=$version$REF
+          fi
+          # Save computed version
+          echo "Computed version: $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Gradle build
+        run: gradle -Pversion=${{ steps.compute-version.outputs.version }} build
+      - name: Gradle publish
+        env:
+          PUBLISH_USERNAME: ${{ secrets.PUBLISH_USERNAME }}
+          PUBLISH_PASSWORD: ${{ secrets.PUBLISH_PASSWORD }}
+        run: gradle -Pversion=${{ steps.compute-version.outputs.version }} publish

@@ -7,7 +7,6 @@ plugins {
 }
 
 group = "dev.bazhard.library"
-version = "1.0.0-SNAPSHOT"
 description = "A 3D GUI library for Minecraft plugins"
 
 java {
@@ -30,16 +29,16 @@ publishing {
             name = "snapshot"
             url = uri("https://repo.bazhard.dev/repository/maven-snapshots/")
             credentials {
-                username = mavenCredentials?.first ?: ""
-                password = mavenCredentials?.second ?: ""
+                username = mavenCredentials?.first ?: System.getenv("PUBLISH_USERNAME") ?: ""
+                password = mavenCredentials?.second ?: System.getenv("PUBLISH_PASSWORD") ?: ""
             }
         }
         maven {
             name = "release"
             url = uri("https://repo.bazhard.dev/repository/maven-releases/")
             credentials {
-                username = mavenCredentials?.first ?: ""
-                password = mavenCredentials?.second ?: ""
+                username = mavenCredentials?.first ?: System.getenv("PUBLISH_USERNAME") ?: ""
+                password = mavenCredentials?.second ?: System.getenv("PUBLISH_PASSWORD") ?: ""
             }
         }
     }
@@ -47,7 +46,7 @@ publishing {
 
 repositories {
     mavenCentral()
-    maven( "https://repo.dmulloy2.net/repository/public/") // Required for ProtocolLib
+    maven("https://repo.dmulloy2.net/repository/public/") // Required for ProtocolLib
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
@@ -69,6 +68,18 @@ tasks {
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
+    }
+}
+
+tasks.withType<PublishToMavenRepository>().configureEach {
+    onlyIf("publishing snapshots to the snapshot repository and releases to the release repository") {
+        repository == publishing.repositories[if (version.toString().endsWith("-SNAPSHOT")) "snapshot" else "release"]
+    }
+}
+
+tasks.register("printVersion") {
+    doLast {
+        println(project.version)
     }
 }
 
