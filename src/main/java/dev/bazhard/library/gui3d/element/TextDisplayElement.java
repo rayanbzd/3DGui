@@ -14,6 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class TextDisplayElement extends GenericDisplayElement{
@@ -25,7 +28,7 @@ public class TextDisplayElement extends GenericDisplayElement{
     private Component component;
     private Color backgroundColor;
     private Byte textOpacity;
-    private Integer linePixelWidth;
+    private Integer linePixelWidth = 200;
     private boolean hasShadow = false;
     private boolean canSeeThrough = false;
     private Alignment alignment = Alignment.CENTER;
@@ -42,43 +45,31 @@ public class TextDisplayElement extends GenericDisplayElement{
     public DisplayElement setComponent(Component component) {
         this.component = component;
         calculateComponentHeightWidth();
-        getPendingUpdates().put(23, new WrappedDataValue(23,  WrappedDataSerializers.componentSerializer,
-                WrappedChatComponent.fromJson(JSONComponentSerializer.json().serialize(component)).getHandle()));
         return this;
     }
 
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
-        if (backgroundColor != null) {
-            getPendingUpdates().put(25, new WrappedDataValue(25, WrappedDataSerializers.integerSerializer, backgroundColor.asARGB()));
-        }else{
-            getPendingUpdates().put(25, new WrappedDataValue(25, WrappedDataSerializers.integerSerializer, 0x40000000)); // 0x40000000 is the default value
-        }
     }
 
     public void setTextOpacity(Byte textOpacity) {
         this.textOpacity = textOpacity;
-        getPendingUpdates().put(26, new WrappedDataValue(26, WrappedDataSerializers.byteSerializer, Objects.requireNonNullElseGet(textOpacity, () -> (byte) -1)));
     }
 
     public void setLinePixelWidth(Integer linePixelWidth) {
         this.linePixelWidth = linePixelWidth;
-        getPendingUpdates().put(24, new WrappedDataValue(24, WrappedDataSerializers.integerSerializer, Objects.requireNonNullElse(linePixelWidth, 200))); // 200 is the default value
     }
 
     public void hasShadow(boolean hasShadow) {
         this.hasShadow = hasShadow;
-        getPendingUpdates().put(27, new WrappedDataValue(27, WrappedDataSerializers.byteSerializer, calculateBitmask()));
     }
 
     public void canSeeThrough(boolean canSeeThrough) {
         this.canSeeThrough = canSeeThrough;
-        getPendingUpdates().put(27, new WrappedDataValue(27, WrappedDataSerializers.byteSerializer, calculateBitmask()));
     }
 
     public void alignment(Alignment alignment) {
         this.alignment = alignment;
-        getPendingUpdates().put(27, new WrappedDataValue(27, WrappedDataSerializers.byteSerializer, calculateBitmask()));
     }
 
     public Component getComponent() {
@@ -144,6 +135,31 @@ public class TextDisplayElement extends GenericDisplayElement{
 
         Quad quad = new Quad(referential, scaledWidth/2, scaledHeight/2);
         return intersectionSegmentQuad(segment, quad, null);
+    }
+
+    @Override
+    protected List<WrappedDataValue> getAdditionalDataValues() { // https://wiki.vg/Entity_metadata#Text_Display
+        List<WrappedDataValue> values = new ArrayList<>();
+
+        values.add(new WrappedDataValue(23,  WrappedDataSerializers.componentSerializer,
+                WrappedChatComponent.fromJson(JSONComponentSerializer.json().serialize(component)).getHandle()));
+
+        values.add(new WrappedDataValue(24, WrappedDataSerializers.integerSerializer, Objects.requireNonNullElse(linePixelWidth, 200)));
+
+        if (backgroundColor != null) {
+            values.add(new WrappedDataValue(25, WrappedDataSerializers.integerSerializer, backgroundColor.asARGB()));
+        }else{
+            values.add(new WrappedDataValue(25, WrappedDataSerializers.integerSerializer, 0x40000000));
+        }
+
+        values.add(new WrappedDataValue(26, WrappedDataSerializers.byteSerializer, Objects.requireNonNullElseGet(textOpacity, () -> (byte) -1)));
+
+        byte bitmask = calculateBitmask();
+        if(bitmask!=0){
+            values.add(new WrappedDataValue(27, WrappedDataSerializers.byteSerializer, bitmask));
+        }
+
+        return values;
     }
 
     private byte calculateBitmask() {

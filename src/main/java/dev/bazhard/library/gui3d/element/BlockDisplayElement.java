@@ -27,7 +27,6 @@ public class BlockDisplayElement extends GenericDisplayElement{
 
     public DisplayElement setMaterial(Material material) {
         this.material = material;
-        getPendingUpdates().put(23, new WrappedDataValue(23,  WrappedDataSerializers.blockDataSerializer, WrappedBlockData.createData(getMaterial()).getHandle()));
         return this;
     }
 
@@ -74,6 +73,12 @@ public class BlockDisplayElement extends GenericDisplayElement{
         if (tMax[2] < tMax[0]) tMax[0] = tMax[2];
 
         return tMin[0] < maxDistance && tMax[0] > 0;
+    }
+
+    @Override
+    protected List<WrappedDataValue> getAdditionalDataValues(){ // https://wiki.vg/Entity_metadata#Item_Display
+        return List.of(new WrappedDataValue(23,  WrappedDataSerializers.blockDataSerializer,
+                WrappedBlockData.createData(getMaterial()).getHandle()));
     }
 
 }
