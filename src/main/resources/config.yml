@@ -1,0 +1,2 @@
+player-move-update-frequency: 2 # How often GUI3D should update and check for player movement in ticks (this allow you to control responsiveness of the hover/unhover interactions with elements)
+player-move-update-minimum-offset: 0.1 # Minimum distance the player must move to trigger a player movement update (works also with head rotation)
