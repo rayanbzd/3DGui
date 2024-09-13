@@ -446,6 +446,17 @@ public abstract class GenericDisplayElement implements DisplayElement{
 
     /**
      * Set the brightness override
+     * @param blockLight The block brightness override
+     * @param skyLight The sky brightness override
+     * @return The display element
+     */
+    @Override
+    public DisplayElement setBrightnessOverride(int blockLight, int skyLight) {
+        return setBrightnessOverride(blockLight << 4 | skyLight << 20);
+    }
+
+    /**
+     * Set the brightness override
      * @param brightnessOverride The brightness override
      * @return The display element
      */

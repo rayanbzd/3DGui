@@ -1,5 +1,10 @@
 package dev.bazhard.library.gui3d;
 
+import dev.bazhard.library.gui3d.drawing.Box;
+import dev.bazhard.library.gui3d.drawing.Composite;
+import dev.bazhard.library.gui3d.drawing.DrawingContext;
+import dev.bazhard.library.gui3d.drawing.MathUtils;
+import dev.bazhard.library.gui3d.drawing.Sphere;
 import dev.bazhard.library.gui3d.element.BlockDisplayElement;
 import dev.bazhard.library.gui3d.element.TextDisplayElement;
 import dev.bazhard.library.gui3d.listeners.DisplayElementClickListener;
@@ -16,8 +21,12 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
 
@@ -43,6 +52,7 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
     @Override
     public void onDisable() {
         getLogger().info("3D GUI has been disabled!");
+        context.clear();
     }
 
     private TextDisplayElement textDisplayElement;
@@ -50,10 +60,44 @@ public class Gui3D extends JavaPlugin implements CommandExecutor, Listener {
     private Location loc1, loc2;
     private AABBVisualizer aabbVisualizer;
 
+    private final DrawingContext context = new DrawingContext();
+
     // This is a test command and should be removed
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String msg, @NotNull String[] args) {
         if(!(sender instanceof Player player))return false;
+
+        if (true) {
+            context.clear();
+            context.setViewer(player);
+            //Line.from(player.getLocation(), 5).draw(context);
+            Location location = player.getLocation();
+            Box box = new Box(
+                    //location.toVector().toVector3f(),
+                    new Vector3f(),
+                    new Vector3f(0.5f, 2, 1),
+                    new Quaternionf()
+                    //MathUtils.rotationFromToWithoutRoll(MathUtils.Z, location.getDirection().toVector3f())
+                    //new Quaternionf().lookAlong(location.getDirection().toVector3f(), MathUtils.Y).conjugate()
+            );
+            Sphere sphere = new Sphere(
+                    //location.toVector().toVector3f(),
+                    new Vector3f(),
+                    new Vector3f(2, 0.5f, 1),
+                    new Quaternionf(),
+                    //new Quaternionf().lookAlong(location.getDirection().toVector3f(), MathUtils.Y).conjugate(),
+                    20,
+                    10
+            );
+            new Composite(Arrays.asList(box, sphere), new Matrix4f().translationRotateScale(
+                    location.toVector().toVector3f(),
+                    new Quaternionf().lookAlong(location.getDirection().toVector3f(), MathUtils.Y).conjugate(),
+                    new Vector3f(5)
+            )).draw(context);
+            context.show();
+
+            return true;
+        }
 
         //Block b = p.getTargetBlockExact(10);
         //if(b==null)return false;

@@ -68,6 +68,7 @@ public interface DisplayElement {
     DisplayElement setViewRangeInBlocks(int range);
     DisplayElement setBillboard(Billboard billboard);
     DisplayElement setBrightnessOverride(int brightness);
+    DisplayElement setBrightnessOverride(int blockLight, int skyLight);
     DisplayElement setInterpolationDelay(int delay);
     DisplayElement setInterpolationTransformDuration(int duration);
     DisplayElement setInterpolationPosRotateDuration(int duration);
