@@ -5,6 +5,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
+import dev.bazhard.library.gui3d.DisplayManager;
 import dev.bazhard.library.gui3d.Gui3D;
 import dev.bazhard.library.gui3d.utils.WrappedDataSerializers;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -21,7 +22,7 @@ import java.util.*;
 
 public abstract class GenericDisplayElement implements DisplayElement{
 
-    private final int entityID;
+    private int entityID;
     private final Player viewer;
     private Location location;
     private boolean glowing;
@@ -46,7 +47,6 @@ public abstract class GenericDisplayElement implements DisplayElement{
     private int interpolationPosRotateDuration = 0;
 
     public GenericDisplayElement(Player viewer, Location location) {
-        this.entityID = Gui3D.getInstance().getDisplayManager().getNextEntityID(viewer.getUniqueId());
         this.viewer = viewer;
         this.location = location;
     }
@@ -472,10 +472,10 @@ public abstract class GenericDisplayElement implements DisplayElement{
     @Override
     public void show() {
         if(!getViewer().isOnline())return;
-
+        this.entityID = Gui3D.getInstance().getDisplayManager().getEntityIDPool(viewer.getUniqueId()).getNext();
         PacketContainer spawnPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.SPAWN_ENTITY);
 
-        spawnPacket.getIntegers().write(0, getEntityID());
+        spawnPacket.getIntegers().write(0, this.entityID);
         spawnPacket.getUUIDs().write(0, UUID.randomUUID());
         spawnPacket.getEntityTypeModifier().write(0, getEntityType());
         spawnPacket.getDoubles().write(0, getLocation().getX());
@@ -506,6 +506,12 @@ public abstract class GenericDisplayElement implements DisplayElement{
         Set<GenericDisplayElement> elements = Gui3D.getInstance().getDisplayManager().getPlayerDisplayedElements()
                 .computeIfAbsent(getViewer().getUniqueId(), k -> new HashSet<>());
         elements.removeIf(e -> e.getUUID().equals(this.getUUID()));
+        DisplayManager.EntityIDPool entityIDPool = Gui3D.getInstance().getDisplayManager().getEntityIDPool(getViewer().getUniqueId());
+        try {
+            entityIDPool.release(getEntityID());
+        } catch (DisplayManager.EntityNotLockedException e) {
+            Gui3D.getInstance().getLogger().severe("Entity ID " + getEntityID() + " was not locked or already released (type: " + this.getClass().getSimpleName() + ")");
+        }
     }
 
     /**
