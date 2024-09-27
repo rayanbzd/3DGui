@@ -100,6 +100,14 @@ public class TextDisplayElement extends GenericDisplayElement{
         return alignment;
     }
 
+    public float getScaleWidth() {
+        return scaleWidth;
+    }
+
+    public float getScaleHeight() {
+        return scaleHeight;
+    }
+
     @Override
     public EntityType getEntityType() {
         return EntityType.TEXT_DISPLAY;
