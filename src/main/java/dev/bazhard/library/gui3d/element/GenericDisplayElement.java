@@ -512,7 +512,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
     public void destroy() {
         PacketContainer destroyEntity = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_DESTROY);
         destroyEntity.getModifier().write(0, new IntArrayList(new int[]{getEntityID()}));
-        ProtocolLibrary.getProtocolManager().broadcastServerPacket(destroyEntity);
+        ProtocolLibrary.getProtocolManager().sendServerPacket(viewer, destroyEntity);
 
         Set<GenericDisplayElement> elements = Gui3D.getInstance().getDisplayManager().getPlayerDisplayedElements()
                 .computeIfAbsent(getViewer().getUniqueId(), k -> new HashSet<>());
