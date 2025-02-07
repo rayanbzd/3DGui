@@ -46,13 +46,13 @@ publishing {
 
 repositories {
     mavenCentral()
-    maven("https://repo.dmulloy2.net/repository/public/") // Required for ProtocolLib
+    maven("https://repo.bazhard.dev/repository/maven-public/")
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
     paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0-SNAPSHOT")
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.4.0-SNAPSHOT")
 }
 
 tasks {
