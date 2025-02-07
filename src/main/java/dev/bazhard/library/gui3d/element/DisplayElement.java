@@ -76,6 +76,7 @@ public interface DisplayElement {
     void show();
     void destroy();
     void update();
+    void teleport(Location location);
     void handleHover(Player viewer);
     void handleUnhover(Player viewer);
     void handleClick(Player viewer);

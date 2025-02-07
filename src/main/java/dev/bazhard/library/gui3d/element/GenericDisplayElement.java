@@ -2,6 +2,7 @@ package dev.bazhard.library.gui3d.element;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.InternalStructure;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
@@ -15,6 +16,7 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -252,7 +254,7 @@ public abstract class GenericDisplayElement implements DisplayElement{
      */
     @Override
     public DisplayElement setLocation(Location location) {
-        this.location = location;
+        teleport(location);
         return this;
     }
 
@@ -574,6 +576,22 @@ public abstract class GenericDisplayElement implements DisplayElement{
         metaDataPacket.getDataValueCollectionModifier().write(0, dataValues);
 
         ProtocolLibrary.getProtocolManager().sendServerPacket(getViewer(), metaDataPacket);
+    }
+
+    @Override
+    public void teleport(Location location) {
+        this.location = location;
+        if (!getViewer().isOnline()) return;
+        PacketContainer teleportPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_TELEPORT);
+        teleportPacket.getIntegers().write(0, getEntityID());
+
+        InternalStructure is = teleportPacket.getStructures().getValues().getFirst();
+
+        is.getVectors()
+                .write(0, new Vector(location.getX(), location.getY(), location.getZ()))
+                .write(1, new Vector(0, 0, 0));
+
+        ProtocolLibrary.getProtocolManager().sendServerPacket(getViewer(), teleportPacket);
     }
 
     /**

@@ -52,7 +52,7 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0-SNAPSHOT")
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
 }
 
 tasks {
