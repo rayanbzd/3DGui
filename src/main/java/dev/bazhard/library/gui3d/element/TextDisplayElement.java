@@ -108,6 +108,10 @@ public class TextDisplayElement extends GenericDisplayElement{
         return scaleHeight;
     }
 
+    public Location getCenter() {
+        return center;
+    }
+
     @Override
     public EntityType getEntityType() {
         return EntityType.TEXT_DISPLAY;
