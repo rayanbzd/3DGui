@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,6 +116,13 @@ public class TextDisplayElement extends GenericDisplayElement{
     @Override
     public EntityType getEntityType() {
         return EntityType.TEXT_DISPLAY;
+    }
+
+    @Override
+    public DisplayElement setScale(Vector3f scale) {
+        super.setScale(scale);
+        calculateComponentHeightWidth();
+        return this;
     }
 
     @Override
@@ -236,9 +244,9 @@ public class TextDisplayElement extends GenericDisplayElement{
 
         maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
         this.linePixelWidth = maxLineWidth+1;
-        this.scaleWidth = linePixelWidth/40F; // 40 pixels = 1 block at 1:1 scale
-        this.scaleHeight = numberOflines/4F; // 4 lines = 1 block at 1:1 scale
-        this.center = getLocation().clone().add(1F/40F/2F, scaleHeight/2F, 0);
+        this.scaleWidth = linePixelWidth/40F*getScale().x(); // 40 pixels = 1 block at 1:1 scale
+        this.scaleHeight = numberOflines/4F*getScale().y(); // 4 lines = 1 block at 1:1 scale
+        this.center = getLocation().clone().add(1F/40F/2F*getScale().x(), scaleHeight/2F, 0);
     }
 
 
