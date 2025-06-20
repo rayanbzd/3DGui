@@ -2,7 +2,6 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.7.1"
     id("maven-publish")
 }
 
@@ -12,8 +11,6 @@ description = "A 3D GUI library for Minecraft plugins"
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
-
-paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION // Use the Mojang production mappings
 
 val mavenCredentials = getMavenCredentials("bazhard-dev-repository")
 
@@ -51,7 +48,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.4.0-SNAPSHOT")
 }
 
