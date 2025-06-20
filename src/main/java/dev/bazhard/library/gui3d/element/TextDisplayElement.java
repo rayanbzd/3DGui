@@ -231,10 +231,10 @@ public class TextDisplayElement extends GenericDisplayElement{
         }
 
         maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
-        this.linePixelWidth = maxLineWidth;
+        this.linePixelWidth = maxLineWidth+1;
         this.scaleWidth = linePixelWidth/40F; // 40 pixels = 1 block at 1:1 scale
         this.scaleHeight = numberOflines/4F; // 4 lines = 1 block at 1:1 scale
-        this.center = getLocation().clone().add(0, scaleHeight/2F, 0);
+        this.center = getLocation().clone().add(1F/40F/2F, scaleHeight/2F, 0);
     }
 
 
